@@ -10,27 +10,22 @@ import (
 )
 
 func Register(c *gin.Context) {
-	var UserModel struct {
-		model.User
-		PasswordCheck string
-	}
-	if err := c.ShouldBind(&UserModel); err != nil {
-		c.JSON(http.StatusOK, helper.ApiReturn(constants.CodeError, "数据绑定模型错误", err.Error()))
-	}
+	var UserModel model.User
 
-	// 校验密码输入
-	if UserModel.Password != UserModel.PasswordCheck {
-		c.JSON(http.StatusOK, helper.ApiReturn(constants.CodeError, "两次密码输入不一致", ""))
-	}
+	UserModel.Nickname = c.PostForm("nickname")
+	UserModel.Password = c.PostForm("password")
 
 	// 密码加密
 	UserModel.Password = helper.Getmd5(UserModel.Password)
 
-	res := model.AddUser(UserModel.User)
+	res := model.AddUser(UserModel)
 	if res.Status == constants.CodeError {
 		c.JSON(http.StatusOK, helper.ApiReturn(res.Status, res.Msg, res.Data))
+		return
+	} else {
+		c.JSON(http.StatusOK, helper.ApiReturn(res.Status, res.Msg, res.Data))
 	}
-	res = model.AddUserLevel(UserModel.User)
+	res = model.AddUserLevel(UserModel)
 	c.JSON(http.StatusOK, helper.ApiReturn(res.Status, res.Msg, res.Data))
 	return
 }

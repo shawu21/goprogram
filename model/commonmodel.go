@@ -8,3 +8,11 @@ import (
 
 var db *gorm.DB = mysql.MySqlDb
 
+func init() {
+	db.AutoMigrate(
+		&User{},
+		&Userlevel{},
+		&UserMessage{},
+		&Friends{},
+	)
+}
